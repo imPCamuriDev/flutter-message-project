@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../components/navigation_rail.dart';
-import 'contact_one.dart';
-import 'contact_two.dart';
+import 'conversation_page.dart';
+import 'status_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -14,8 +14,8 @@ class _HomePageState extends State<HomePage> {
   int selectedIndex = 0;
 
   final List<Widget> pages = const [
-    ContactOne(),
-    ContactTwo(),
+    ConversationPage(),
+    StatusPage(),
   ];
 
   @override
