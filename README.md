@@ -1,16 +1,13 @@
-# joaoprojetoestacio
+# Simple Chat Flutter
 
-A new Flutter project.
+Project based on WhatsApp Web.
 
-## Getting Started
+Made with Flutter and WebSockets in JavaScript and Express.js.
 
-This project is a starting point for a Flutter application.
+The project currently only has a simple system for sending and receiving messages; the Status page is static.
 
-A few resources to get you started if this is your first Flutter project:
+Made with the intention of learning how to work with Flutter technology and its components from the Material offered by Google.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+The project's default database is PostgreSQL.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+A Brazilian project made with love by me <3
