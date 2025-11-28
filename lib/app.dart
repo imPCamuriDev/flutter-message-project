@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'pages/home_page.dart';
+import 'pages/login_page.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -7,11 +7,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'NavigationRail Demo',
+      title: 'Chat Project Estacio',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
       ),
-      home: const HomePage(),
+      home: const LoginPage(),
     );
   }
 }

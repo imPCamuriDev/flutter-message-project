@@ -1,27 +1,68 @@
 import 'package:flutter/material.dart';
+import '../api/services/api_service.dart';
+import '../websockets/service/websockets_service.dart';
 
 class ConversationPage extends StatefulWidget {
-  const ConversationPage({super.key});
+  final Map<String, dynamic> usuario;
+  
+  const ConversationPage({super.key, required this.usuario});
 
   @override
   State<ConversationPage> createState() => _ConversationPageState();
 }
 
 class _ConversationPageState extends State<ConversationPage> {
-  String? selectedContact;
+  Map<String, dynamic>? selectedContact;
   final TextEditingController _messageController = TextEditingController();
-  final List<Map<String, dynamic>> _messages = [];
+  List<Map<String, dynamic>> _messages = [];
+  List<dynamic> _contatos = [];
 
-  void _sendMessage() {
-    if (_messageController.text.trim().isNotEmpty) {
-      setState(() {
-        _messages.add({
-          'text': _messageController.text,
-          'isMine': true,
-          'contact': selectedContact,
-        });
-      });
+  @override
+  void initState() {
+    super.initState();
+    _carregarContatos();
+    
+    // Escutar mensagens do WebSocket
+    WebSocketService.onMessage = (dados) {
+      if (dados['tipo'] == 'nova_mensagem') {
+        _carregarMensagens(); // Recarrega mensagens quando recebe nova
+      }
+    };
+  }
+
+  Future<void> _carregarContatos() async {
+    final contatos = await ApiService.buscarContatos(widget.usuario['id']);
+    setState(() => _contatos = contatos);
+  }
+
+  Future<void> _carregarMensagens() async {
+    if (selectedContact == null) return;
+    
+    final mensagens = await ApiService.buscarConversa(
+      widget.usuario['id'],
+      selectedContact!['id'],
+    );
+    
+    setState(() {
+      _messages = mensagens.map((m) => {
+        'text': m['texto'],
+        'isMine': m['remetente_id'] == widget.usuario['id'],
+      }).toList();
+    });
+  }
+
+  Future<void> _sendMessage() async {
+    if (_messageController.text.trim().isEmpty || selectedContact == null) return;
+
+    final sucesso = await ApiService.enviarMensagem(
+      widget.usuario['id'],
+      selectedContact!['id'],
+      _messageController.text,
+    );
+
+    if (sucesso) {
       _messageController.clear();
+      _carregarMensagens(); // Recarrega para mostrar mensagem enviada
     }
   }
 
@@ -30,7 +71,7 @@ class _ConversationPageState extends State<ConversationPage> {
     return Scaffold(
       body: Row(
         children: [
-          // Lista de contatos (lado esquerdo)
+          // Lista de contatos
           Container(
             width: 300,
             decoration: BoxDecoration(
@@ -41,11 +82,11 @@ class _ConversationPageState extends State<ConversationPage> {
                 Container(
                   padding: const EdgeInsets.all(16),
                   color: Colors.teal,
-                  child: const Row(
+                  child: Row(
                     children: [
                       Text(
-                        'Conversas',
-                        style: TextStyle(
+                        widget.usuario['nome'],
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -55,134 +96,90 @@ class _ConversationPageState extends State<ConversationPage> {
                   ),
                 ),
                 Expanded(
-                  child: ListView(
-                    children: [
-                      ListTile(
-                        leading: const CircleAvatar(child: Text('P')),
-                        title: const Text('Pedro Gabriel'),
-                        subtitle: const Text('Oi, tudo bem?'),
-                        selected: selectedContact == 'Pedro Gabriel',
+                  child: ListView.builder(
+                    itemCount: _contatos.length,
+                    itemBuilder: (context, index) {
+                      final contato = _contatos[index];
+                      return ListTile(
+                        leading: CircleAvatar(
+                          child: Text(contato['nome'][0].toUpperCase()),
+                        ),
+                        title: Text(contato['nome']),
+                        subtitle: Text(contato['telefone']),
+                        selected: selectedContact?['id'] == contato['id'],
                         onTap: () {
-                          setState(() {
-                            selectedContact = 'Pedro Gabriel';
-                          });
+                          setState(() => selectedContact = contato);
+                          _carregarMensagens();
                         },
-                      ),
-                      ListTile(
-                        leading: const CircleAvatar(child: Text('M')),
-                        title: const Text('Maria Silva'),
-                        subtitle: const Text('Vamos marcar?'),
-                        selected: selectedContact == 'Maria Silva',
-                        onTap: () {
-                          setState(() {
-                            selectedContact = 'Maria Silva';
-                          });
-                        },
-                      ),
-                      ListTile(
-                        leading: const CircleAvatar(child: Text('J')),
-                        title: const Text('João Santos'),
-                        subtitle: const Text('Obrigado!'),
-                        selected: selectedContact == 'João Santos',
-                        onTap: () {
-                          setState(() {
-                            selectedContact = 'João Santos';
-                          });
-                        },
-                      ),
-                    ],
+                      );
+                    },
                   ),
                 ),
               ],
             ),
           ),
           
-          // Área de conversa (lado direito)
+          // Área de conversa
           Expanded(
             child: selectedContact == null
                 ? const Center(
                     child: Text(
-                      'Começe uma conversa com aquele(a) sumido(a)!',
+                      'Selecione um contato',
                       style: TextStyle(fontSize: 18, color: Colors.grey),
                     ),
                   )
                 : Column(
                     children: [
-                      // Cabeçalho da conversa
+                      // Cabeçalho
                       Container(
                         padding: const EdgeInsets.all(16),
                         color: Colors.teal,
                         child: Row(
                           children: [
                             CircleAvatar(
-                              child: Text(selectedContact![0]),
+                              child: Text(selectedContact!['nome'][0].toUpperCase()),
                             ),
                             const SizedBox(width: 12),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  selectedContact!,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const Text(
-                                  'Online',
-                                  style: TextStyle(
-                                    color: Colors.white70,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
+                            Text(
+                              selectedContact!['nome'],
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ],
                         ),
                       ),
                       
-                      // Área de mensagens
+                      // Mensagens
                       Expanded(
                         child: Container(
                           color: Colors.grey[100],
                           padding: const EdgeInsets.all(16),
-                          child: ListView(
-                            children: [
-                              // Mensagem fixa de exemplo
-                              const Align(
-                                alignment: Alignment.centerLeft,
+                          child: ListView.builder(
+                            itemCount: _messages.length,
+                            itemBuilder: (context, index) {
+                              final msg = _messages[index];
+                              return Align(
+                                alignment: msg['isMine']
+                                    ? Alignment.centerRight
+                                    : Alignment.centerLeft,
                                 child: Card(
+                                  color: msg['isMine'] ? Colors.teal : null,
                                   child: Padding(
-                                    padding: EdgeInsets.all(12),
-                                    child: Text('Oi, tudo bem?'),
-                                  ),
-                                ),
-                              ),
-                              // Mensagens dinâmicas
-                              ..._messages
-                                  .where((msg) => msg['contact'] == selectedContact)
-                                  .map((msg) {
-                                return Align(
-                                  alignment: msg['isMine']
-                                      ? Alignment.centerRight
-                                      : Alignment.centerLeft,
-                                  child: Card(
-                                    color: msg['isMine'] ? Colors.teal : null,
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(12),
-                                      child: Text(
-                                        msg['text'],
-                                        style: TextStyle(
-                                          color: msg['isMine']
-                                              ? Colors.white
-                                              : Colors.black,
-                                        ),
+                                    padding: const EdgeInsets.all(12),
+                                    child: Text(
+                                      msg['text'],
+                                      style: TextStyle(
+                                        color: msg['isMine']
+                                            ? Colors.white
+                                            : Colors.black,
                                       ),
                                     ),
                                   ),
-                                );
-                              }),
-                            ],
+                                ),
+                              );
+                            },
                           ),
                         ),
                       ),
@@ -225,6 +222,7 @@ class _ConversationPageState extends State<ConversationPage> {
   @override
   void dispose() {
     _messageController.dispose();
+    WebSocketService.desconectar();
     super.dispose();
   }
 }

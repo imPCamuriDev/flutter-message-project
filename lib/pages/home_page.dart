@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import '../components/navigation_rail.dart';
 import 'conversation_page.dart';
 import 'status_page.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final Map<String, dynamic> usuario;
+  
+  const HomePage({super.key, required this.usuario});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -13,26 +14,33 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int selectedIndex = 0;
 
-  final List<Widget> pages = const [
-    ConversationPage(),
-    StatusPage(),
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final List<Widget> pages = [
+      ConversationPage(usuario: widget.usuario),
+      const StatusPage(),
+    ];
+
     return Scaffold(
       body: Row(
         children: [
-          NavigationRailComp(
+          NavigationRail(
             selectedIndex: selectedIndex,
-            onSelect: (index) {
+            onDestinationSelected: (index) {
               setState(() => selectedIndex = index);
             },
+            destinations: const [
+              NavigationRailDestination(
+                icon: Icon(Icons.chat),
+                label: Text('Conversas'),
+              ),
+              NavigationRailDestination(
+                icon: Icon(Icons.circle),
+                label: Text('Status'),
+              ),
+            ],
           ),
-
-          Expanded(
-            child: pages[selectedIndex],
-          ),
+          Expanded(child: pages[selectedIndex]),
         ],
       ),
     );
