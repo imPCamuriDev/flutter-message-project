@@ -1,99 +1,83 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-class ApiService {
-  static const String baseUrl = 'http://localhost:3000';
+class ApiService<T> {
+  final String baseUrl;
+  final T Function(Map<String, dynamic>) fromJson;
+  final Map<String, dynamic> Function(T) toJson;
   
-  // Criar usuário (registro)
-  static Future<Map<String, dynamic>?> registrar(String nome, String telefone) async {
+  ApiService({
+    required this.baseUrl,
+    required this.fromJson,
+    required this.toJson,
+  });
+  
+  // Buscar um item por ID
+  Future<T?> buscarPorId(int id, String endpoint) async {
+    try {
+      final response = await http.get(Uri.parse('$baseUrl/$endpoint/$id'));
+      
+      if (response.statusCode == 200) {
+        return fromJson(jsonDecode(response.body));
+      }
+      return null;
+    } catch (e) {
+      print('Erro ao buscar $endpoint: $e');
+      return null;
+    }
+  }
+  
+  // Buscar todos os itens
+  Future<List<T>> buscarTodos(String endpoint) async {
+    try {
+      final response = await http.get(Uri.parse('$baseUrl/$endpoint'));
+      
+      if (response.statusCode == 200) {
+        final List<dynamic> dados = jsonDecode(response.body);
+        return dados.map((item) => fromJson(item)).toList();
+      }
+      return [];
+    } catch (e) {
+      print('Erro ao buscar $endpoint: $e');
+      return [];
+    }
+  }
+  
+  // Criar novo item
+  Future<T?> criar(T item, String endpoint) async {
     try {
       final response = await http.post(
-        Uri.parse('$baseUrl/usuarios'),
+        Uri.parse('$baseUrl/$endpoint'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'nome': nome, 'telefone': telefone}),
+        body: jsonEncode(toJson(item)),
       );
       
       if (response.statusCode == 200) {
-        return jsonDecode(response.body);
+        return fromJson(jsonDecode(response.body));
       }
       return null;
     } catch (e) {
-      print('Erro ao registrar: $e');
+      print('Erro ao criar $endpoint: $e');
       return null;
     }
   }
   
-  // Buscar usuário por telefone (login simples)
-  static Future<Map<String, dynamic>?> login(String telefone) async {
+  // Buscar com filtro personalizado
+  Future<List<T>> buscarComFiltro(
+    String endpoint, 
+    bool Function(T) filtro
+  ) async {
     try {
-      final response = await http.get(Uri.parse('$baseUrl/usuarios'));
+      final response = await http.get(Uri.parse('$baseUrl/$endpoint'));
       
       if (response.statusCode == 200) {
-        final List<dynamic> usuarios = jsonDecode(response.body);
-        
-        // Busca usuário com o telefone informado
-        for (var usuario in usuarios) {
-          if (usuario['telefone'] == telefone) {
-            return usuario;
-          }
-        }
-      }
-      return null;
-    } catch (e) {
-      print('Erro ao fazer login: $e');
-      return null;
-    }
-  }
-  
-  // Buscar todos os contatos (menos o usuário logado)
-  static Future<List<dynamic>> buscarContatos(int meuId) async {
-    try {
-      final response = await http.get(Uri.parse('$baseUrl/usuarios'));
-      
-      if (response.statusCode == 200) {
-        final List<dynamic> usuarios = jsonDecode(response.body);
-        return usuarios.where((u) => u['id'] != meuId).toList();
+        final List<dynamic> dados = jsonDecode(response.body);
+        final todosItens = dados.map((item) => fromJson(item)).toList();
+        return todosItens.where(filtro).toList();
       }
       return [];
     } catch (e) {
-      print('Erro ao buscar contatos: $e');
-      return [];
-    }
-  }
-  
-  // Enviar mensagem
-  static Future<bool> enviarMensagem(int remetenteId, int destinatarioId, String texto) async {
-    try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/mensagens'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'remetente_id': remetenteId,
-          'destinatario_id': destinatarioId,
-          'texto': texto,
-        }),
-      );
-      
-      return response.statusCode == 200;
-    } catch (e) {
-      print('Erro ao enviar mensagem: $e');
-      return false;
-    }
-  }
-  
-  // Buscar conversa entre dois usuários
-  static Future<List<dynamic>> buscarConversa(int usuario1Id, int usuario2Id) async {
-    try {
-      final response = await http.get(
-        Uri.parse('$baseUrl/mensagens/$usuario1Id/$usuario2Id')
-      );
-      
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body);
-      }
-      return [];
-    } catch (e) {
-      print('Erro ao buscar conversa: $e');
+      print('Erro ao buscar $endpoint: $e');
       return [];
     }
   }
