@@ -19,28 +19,22 @@ class WebSocketService<T> {
     // Escutar mensagens com tratamento melhorado
     _channel!.stream.listen(
       (mensagem) {
-        print('📨 WebSocket RAW recebido: $mensagem');
 
         try {
           final dados = jsonDecode(mensagem);
 
           if (dados is Map<String, dynamic>) {
-            print('📦 Tipo de mensagem: ${dados['tipo']}');
-
             // CASO 1: Mensagem vem dentro de envelope 'nova_mensagem'
             if (dados['tipo'] == 'nova_mensagem') {
-              print('📬 Processando nova_mensagem com envelope');
 
               // Extrair a mensagem de dentro do envelope
               final mensagemData = dados['mensagem'];
 
               if (mensagemData != null &&
                   mensagemData is Map<String, dynamic>) {
-                print('📄 Dados da mensagem: $mensagemData');
 
                 try {
                   final objetoConvertido = _fromJson(mensagemData);
-                  print('✅ Mensagem convertida com sucesso');
 
                   if (onMessage != null) {
                     onMessage!(objetoConvertido);
@@ -56,7 +50,6 @@ class WebSocketService<T> {
 
               try {
                 final objetoConvertido = _fromJson(dados);
-                print('✅ Mensagem direta convertida com sucesso');
 
                 if (onMessage != null) {
                   onMessage!(objetoConvertido);
@@ -83,8 +76,6 @@ class WebSocketService<T> {
         print('📡 WebSocket desconectado');
       },
     );
-
-    print('✅ WebSocket conectado para usuário $usuarioId');
   }
 
   void enviar(Map<String, dynamic> dados) {
