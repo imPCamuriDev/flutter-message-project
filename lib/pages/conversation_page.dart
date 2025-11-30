@@ -35,32 +35,17 @@ class _ConversationPageState extends State<ConversationPage> {
   }
 
   void _inicializarWebSocket() {
-    print('🎯 Inicializando WebSocket na ConversationPage');
-
-    // Configurar WebSocket para receber mensagens
+    print('🎯 Configurando callback');
+    
     _webSocketService.onMessage = (Mensagem mensagem) {
-      print('🎯 WebSocket callback executado!');
-      print(
-        '🎯 Mensagem recebida - Remetente: ${mensagem.remetenteId}, Destinatário: ${mensagem.destinatarioId}',
-      );
-      print('🎯 Texto: ${mensagem.texto}');
-      print(
-        '🎯 Usuário atual: ${widget.usuario.id}, Contato selecionado: ${selectedContact?.id}',
-      );
+      print('📨 Callback executado: ${mensagem.texto}');
 
-      // VERIFICAR se a mensagem é relevante para a conversa atual
-      final isMensagemRelevante = _isMensagemRelevante(mensagem);
-      print('🎯 Mensagem é relevante? $isMensagemRelevante');
-
-      if (isMensagemRelevante) {
-        print('✅ Adicionando mensagem à conversa: ${mensagem.texto}');
+      if (_isMensagemRelevante(mensagem)) {
         _adicionarMensagem(mensagem);
-      } else {
-        print('📭 Mensagem ignorada - não é para esta conversa');
       }
     };
 
-    // Conectar WebSocket
+    print('🔌 Conectando WebSocket');
     _webSocketService.conectarParaUsuario(widget.usuario.id);
   }
 

@@ -19,31 +19,65 @@ class WebSocketService<T> {
     // Escutar mensagens com tratamento melhorado
     _channel!.stream.listen(
       (mensagem) {
-        print('📨 Mensagem WebSocket recebida: $mensagem');
+        print('📨 WebSocket RAW recebido: $mensagem');
 
         try {
           final dados = jsonDecode(mensagem);
 
-          // Verificar se é uma mensagem do tipo que esperamos
           if (dados is Map<String, dynamic>) {
-            // Se for uma mensagem de chat, processar
-            if (dados['tipo'] == 'nova_mensagem' || dados['texto'] != null) {
-              final objetoConvertido = _fromJson(dados);
-              if (onMessage != null) {
-                print('✅ Mensagem processada: ${objetoConvertido}');
-                onMessage!(objetoConvertido);
+            print('📦 Tipo de mensagem: ${dados['tipo']}');
+
+            // CASO 1: Mensagem vem dentro de envelope 'nova_mensagem'
+            if (dados['tipo'] == 'nova_mensagem') {
+              print('📬 Processando nova_mensagem com envelope');
+
+              // Extrair a mensagem de dentro do envelope
+              final mensagemData = dados['mensagem'];
+
+              if (mensagemData != null &&
+                  mensagemData is Map<String, dynamic>) {
+                print('📄 Dados da mensagem: $mensagemData');
+
+                try {
+                  final objetoConvertido = _fromJson(mensagemData);
+                  print('✅ Mensagem convertida com sucesso');
+
+                  if (onMessage != null) {
+                    onMessage!(objetoConvertido);
+                  }
+                } catch (e) {
+                  print('❌ Erro ao converter mensagem do envelope: $e');
+                }
               }
-            } else {
-              print('📝 Mensagem de outro tipo: ${dados['tipo']}');
+            }
+            // CASO 2: Mensagem vem diretamente (sem envelope)
+            else if (dados['texto'] != null) {
+              print('📬 Processando mensagem direta');
+
+              try {
+                final objetoConvertido = _fromJson(dados);
+                print('✅ Mensagem direta convertida com sucesso');
+
+                if (onMessage != null) {
+                  onMessage!(objetoConvertido);
+                }
+              } catch (e) {
+                print('❌ Erro ao converter mensagem direta: $e');
+              }
+            }
+            // CASO 3: Mensagem de sistema (registro, etc)
+            else {
+              print('📝 Mensagem de sistema ignorada: ${dados['tipo']}');
             }
           }
-        } catch (e) {
+        } catch (e, stackTrace) {
           print('❌ Erro ao processar mensagem WebSocket: $e');
+          print('Stack trace: $stackTrace');
           print('Mensagem recebida: $mensagem');
         }
       },
       onError: (error) {
-        print('❌ Erro no WebSocket: $error');
+        print('❌ Erro no stream WebSocket: $error');
       },
       onDone: () {
         print('📡 WebSocket desconectado');
@@ -53,13 +87,17 @@ class WebSocketService<T> {
     print('✅ WebSocket conectado para usuário $usuarioId');
   }
 
-  void enviar(T dados) {
+  void enviar(Map<String, dynamic> dados) {
     if (_channel != null) {
       try {
-        _channel!.sink.add(jsonEncode(dados));
+        final json = jsonEncode(dados);
+        _channel!.sink.add(json);
+        print('📤 Mensagem enviada via WebSocket: $json');
       } catch (e) {
         print('❌ Erro ao enviar mensagem WebSocket: $e');
       }
+    } else {
+      print('⚠️ WebSocket não está conectado');
     }
   }
 
