@@ -22,7 +22,6 @@ class ApiService<T> {
       }
       return null;
     } catch (e) {
-      print('Erro ao buscar $endpoint: $e');
       return null;
     }
   }
@@ -38,7 +37,6 @@ class ApiService<T> {
       }
       return [];
     } catch (e) {
-      print('Erro ao buscar $endpoint: $e');
       return [];
     }
   }
@@ -57,7 +55,6 @@ class ApiService<T> {
       }
       return null;
     } catch (e) {
-      print('Erro ao criar $endpoint: $e');
       return null;
     }
   }
@@ -77,7 +74,6 @@ class ApiService<T> {
       }
       return [];
     } catch (e) {
-      print('Erro ao buscar $endpoint: $e');
       return [];
     }
   }
