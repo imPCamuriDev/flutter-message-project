@@ -14,7 +14,7 @@ class NavigationRailComp extends StatelessWidget {
   Widget build(BuildContext context) {
     return NavigationRail(
       selectedIndex: selectedIndex,
-      onDestinationSelected: onSelect,
+      onDestinationSelected: onSelect, // Callback ao selecionar um item do menu lateral
       labelType: NavigationRailLabelType.all,
       destinations: const [
         NavigationRailDestination(
