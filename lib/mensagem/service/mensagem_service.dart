@@ -27,15 +27,7 @@ class MensagemService extends ApiService<Mensagem> {
     }
   }
   
-  Future<bool> enviarMensagem(int remetenteId, int destinatarioId, String texto) async {
-    final mensagem = Mensagem(
-      id: 0,
-      remetenteId: remetenteId,
-      destinatarioId: destinatarioId,
-      texto: texto,
-      dataEnvio: DateTime.now(),
-    );
-    
+  Future<bool> enviarMensagem(Mensagem mensagem) async {
     final resultado = await criar(mensagem, 'mensagens');
     return resultado != null;
   }

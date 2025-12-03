@@ -103,11 +103,7 @@ class _ConversationPageState extends State<ConversationPage> {
     _adicionarMensagem(mensagem);
     _messageController.clear();
 
-    final sucesso = await _mensagemService.enviarMensagem(
-      widget.usuario.id,
-      selectedContact!.id,
-      texto,
-    );
+    final sucesso = await _mensagemService.enviarMensagem(mensagem);
 
     if (sucesso) {
       try {
