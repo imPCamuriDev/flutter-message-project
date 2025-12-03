@@ -10,10 +10,10 @@ class MensagemService extends ApiService<Mensagem> {
     toJson: (mensagem) => mensagem.toJson(),
   );
   
-  Future<List<Mensagem>> buscarConversa(int usuario1Id, int usuario2Id) async {
+  Future<List<Mensagem>> buscarConversa(int usuarioAtualId, int contatoId) async {
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl/mensagens/$usuario1Id/$usuario2Id')
+        Uri.parse('$baseUrl/mensagens/$usuarioAtualId/$contatoId')
       );
       
       if (response.statusCode == 200) {

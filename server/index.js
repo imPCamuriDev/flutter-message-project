@@ -111,8 +111,8 @@ app.post('/mensagens', async (req, res) => {
 });
 
 // 4. BUSCAR CONVERSA ENTRE DOIS USUÁRIOS
-app.get('/mensagens/:usuario1_id/:usuario2_id', async (req, res) => {
-  const { usuario1_id, usuario2_id } = req.params;
+app.get('/mensagens/:usuarioAtualId/:contatoId', async (req, res) => {
+  const { usuarioAtualId, contatoId } = req.params;
   
   try {
     const resultado = await pool.query(`
@@ -127,7 +127,7 @@ app.get('/mensagens/:usuario1_id/:usuario2_id', async (req, res) => {
         OR
         (m.remetente_id = $2 AND m.destinatario_id = $1)
       ORDER BY m.enviado_em ASC
-    `, [usuario1_id, usuario2_id]);
+    `, [usuarioAtualId, contatoId]);
     
     res.json(resultado.rows);
   } catch (error) {
