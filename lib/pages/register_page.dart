@@ -27,7 +27,8 @@ class _RegisterPageState extends State<RegisterPage> {
     setState(() => _loading = true);
 
     try {
-      final Usuario? usuario = await _usuarioService.registrar(nome, telefone, DateTime.now());
+
+      final Usuario? usuario = await _usuarioService.registrar(new Usuario(nome: nome, telefone: telefone, criadoEm: DateTime.now()));
 
       setState(() => _loading = false);
 

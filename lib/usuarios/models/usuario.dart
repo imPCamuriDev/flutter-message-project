@@ -1,11 +1,11 @@
 class Usuario {
-  final int id;
+  final int? id;
   final String nome;
   final String telefone;
   final DateTime? criadoEm;
   
   Usuario({
-    required this.id,
+    this.id,
     required this.nome,
     required this.telefone,
     required this.criadoEm,

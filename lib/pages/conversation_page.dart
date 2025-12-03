@@ -44,7 +44,7 @@ class _ConversationPageState extends State<ConversationPage> {
       }
     };
 
-    _webSocketService.conectarParaUsuario(widget.usuario.id);
+    _webSocketService.conectarParaUsuario(widget.usuario.id!);
   }
 
   bool _isMensagemRelevante(Mensagem mensagem) {
@@ -60,7 +60,7 @@ class _ConversationPageState extends State<ConversationPage> {
   }
 
   Future<void> _carregarContatos() async {
-    final contatos = await _usuarioService.buscarContatos(widget.usuario.id);
+    final contatos = await _usuarioService.buscarContatos(widget.usuario.id!);
     setState(() => _contatos = contatos);
   }
 
@@ -69,8 +69,8 @@ class _ConversationPageState extends State<ConversationPage> {
 
     try {
       final mensagens = await _mensagemService.buscarConversa(
-        widget.usuario.id,
-        selectedContact!.id,
+        widget.usuario.id!,
+        selectedContact!.id!,
       );
 
       setState(() {
@@ -93,8 +93,8 @@ class _ConversationPageState extends State<ConversationPage> {
 
     final mensagem = Mensagem(
       id: 0,
-      remetenteId: widget.usuario.id,
-      destinatarioId: selectedContact!.id,
+      remetenteId: widget.usuario.id!,
+      destinatarioId: selectedContact!.id!,
       texto: texto,
       dataEnvio: DateTime.now(),
       remetenteNome: widget.usuario.nome,
@@ -175,7 +175,7 @@ class _ConversationPageState extends State<ConversationPage> {
                       Expanded(
                         child: MessageList(
                           messages: _messages,
-                          meuId: widget.usuario.id,
+                          meuId: widget.usuario.id!,
                           contato: selectedContact!,
                         ),
                       ),

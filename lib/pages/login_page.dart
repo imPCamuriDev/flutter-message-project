@@ -35,7 +35,7 @@ class _LoginPageState extends State<LoginPage> {
 
       if (usuario != null && mounted) {
         // Conectar ao WebSocket com o novo serviço
-        _webSocketService.conectarParaUsuario(usuario.id);
+        _webSocketService.conectarParaUsuario(usuario.id!);
         
         // Ir para home passando o objeto Usuario
         Navigator.pushReplacement(

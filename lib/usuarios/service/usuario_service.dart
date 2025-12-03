@@ -9,14 +9,17 @@ class UsuarioService extends ApiService<Usuario> {
   );
   
   // Métodos específicos para usuários
-  Future<Usuario?> registrar(String nome, String telefone, DateTime criadoEm) async {
-    final usuarioTemp = Usuario(
-      id: 0, // ID temporário
-      nome: nome,
-      telefone: telefone,
-      criadoEm: criadoEm,
-    );
-    return await criar(usuarioTemp, 'usuarios');
+  // Future<Usuario?> registrar(String nome, String telefone, DateTime criadoEm) async {
+  //   final usuarioTemp = Usuario(
+  //     id: 0, // ID temporário
+  //     nome: nome,
+  //     telefone: telefone,
+  //     criadoEm: criadoEm,
+  //   );
+  //   return await criar(usuarioTemp, 'usuarios');
+  // }
+  Future<Usuario?> registrar(Usuario usuario) async {
+    return await criar(usuario, 'usuarios');
   }
   
   Future<Usuario?> login(String telefone) async {
