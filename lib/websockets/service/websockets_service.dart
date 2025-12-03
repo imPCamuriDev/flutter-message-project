@@ -83,7 +83,6 @@ class WebSocketService<T> {
       try {
         final json = jsonEncode(dados);
         _channel!.sink.add(json);
-        print('📤 Mensagem enviada via WebSocket: $json');
       } catch (e) {
         print('❌ Erro ao enviar mensagem WebSocket: $e');
       }

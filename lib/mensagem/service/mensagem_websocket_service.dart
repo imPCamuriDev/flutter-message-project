@@ -10,8 +10,6 @@ class MensagemWebSocketService extends WebSocketService<Mensagem> {
   
   void enviarMensagem(Mensagem mensagem) {
   final dados = mensagem.toJson();
-  
-  print('📤 Enviando mensagem via WebSocket: ${mensagem.texto}');
   enviar(dados);
 }
 }
